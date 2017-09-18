@@ -1,0 +1,224 @@
+---
+title: "MMAT2"
+author: "Adil Hayat, Yijing Tao"
+date: "10 September 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rkdb)
+theme_update(plot.title = element_text(hjust = 0.5))
+```
+
+## Question 1
+```{r, cache=TRUE}
+h <- open_connection('kx',7009)
+query <- "select avvol: avg v by txntime from (select v:sum siz by date, 
+          900000000000 xbar txntime from trade where date within 
+          2017.07.31 2017.09.01, sym2inst[sym]=`ZW)"
+data <- execute(h, query)
+
+# create an empty data frame
+df <- data.frame(txntime = seq(-25200,57600,900),dat=rep(0,93)) 
+df <- merge(df,data,all.x = TRUE)
+df$avvol <- ifelse(is.na(df$avvol),df$dat,df$avvol)
+
+ggplot(df, aes(x=txntime/3600, y=avvol/1000)) +geom_line(color='red') + 
+  geom_point() + ylab("Thousands of lots in 15 minutes") + xlab("Time") +
+  ggtitle("Wheat(ZW) 2017-07-31 to 2017-09-01")+ 
+  scale_x_continuous(limits=c(-7,16), breaks=seq(-6,16,2))
+  
+```
+We think the spikes in the graph are caused at market open/close and at the times of release of key market news/numbers.
+
+
+## plot the graph for various other products
+```{r, cache=TRUE}
+# interest rate products
+h <- open_connection('kx',6009)
+query <- "select first inst, first name by class from `class`v xdesc (select inst,
+class,name from instinfo) lj select v:sum siz by inst:sym2inst[sym] from trade where
+date within 2017.07.31 2017.09.01, not null sym2inst[sym]"
+prod <- execute(h,query)
+
+
+for(inst in prod$inst){
+  h <- ifelse(inst=="ZN",open_connection('kx',6009),open_connection('kx',7009))
+  query <- paste("select avvol: avg v by txntime from (select v:sum siz by date, 
+                 900000000000 xbar txntime from trade where date within 
+                 2017.07.31 2017.09.01, sym2inst[sym]=","`",inst,")",sep="")
+data <- execute(h, query)
+
+# for plotting
+# create an empty data frame
+df <- data.frame(txntime = seq(-25200,57600,900),dat=rep(0,93)) 
+df <- merge(df,data,all.x = TRUE)
+df$avvol <- ifelse(is.na(df$avvol),df$dat,df$avvol)
+
+print(ggplot(df, aes(x=txntime/3600, y=avvol/1000)) +geom_line(color='red') + 
+        geom_point() + ylab("Thousands of lots in 15 minutes") + xlab("Time") +
+    ggtitle(paste(inst,"2017-07-31 to 2017-09-01"))+ 
+  scale_x_continuous(limits=c(-7,16), breaks=seq(-6,16,2)))
+}
+
+```
+
+
+
+## Question 2
+```{r, cache=TRUE}
+h <- open_connection('kx',6009)
+query <- "update perOfTotal:v*100%sum(v) from update time2expir:expir-min(expir) from 
+update expir: sym2expir[sym] from select v:sum siz by sym from trade where date 
+within 2017.08.01 2017.09.01,sym2inst[sym]=`GE"
+volData <- execute(h, query)
+ggplot(volData, aes(x=time2expir, y=perOfTotal)) +geom_line(color='green') +
+  geom_point() + ylab("Percentage of total volume") + xlab("Months to expiration") + 
+  ggtitle("Eurodollar(GE) 2017-07-31 to 2017-09-01")
+
+W = sum(-volData$perOfTotal/100*log(volData$perOfTotal/100))
+Neff = exp(W)
+
+cat("W=",W,"\n")
+cat("Neff=",Neff,"\n")
+```
+## plot the graph for the 2 most active IR instruments
+```{r, cache=TRUE}
+# get 2 most active IR instruments
+h<- open_connection("kx",6009)
+query <- "2# select inst from `cumvol xdesc select cumvol:sum siz by 
+          inst:sym2inst[sym] from trade where date within 
+          2017.07.31 2017.09.01, not null sym2inst[sym]"
+insts <- execute(h,query) 
+insts$W <- rep(NA,nrow(insts))
+insts$Neff <- rep(NA,nrow(insts))
+
+for(i in 1:nrow(insts)){
+  inst <- insts$inst[i]
+  query <- paste("update perOfTotal:v*100%sum(v) from update time2expir:expir-min(expir)
+    from update expir: sym2expir[sym] from select v:sum siz by sym from trade where date 
+    within 2017.07.31 2017.09.01,sym2inst[sym]=","`",inst,sep = "")
+volData <- execute(h, query)
+print(ggplot(volData, aes(x=time2expir, y=perOfTotal)) +geom_line(color='green') +
+        geom_point() + ylab("Percentage of total volume") + 
+        xlab("Months to expiration") + ggtitle(paste(inst,"2017-07-31 to 2017-09-01")))
+
+W = sum(-volData$perOfTotal/100*log(volData$perOfTotal/100))
+Neff = exp(W)
+insts$W[i] <- W
+insts$Neff[i] <- Neff
+}
+
+knitr::kable(insts)
+```
+
+## plot the graph for 5 most active non-interest rate instruments
+```{r, cache=TRUE}
+# get 5 most active non-IR instruments
+h<- open_connection("kx",7009)
+query <- "5# select inst from `cumvol xdesc select cumvol:sum siz by 
+          inst:sym2inst[sym] from trade where date within 2017.07.31 2017.09.01,
+          not null sym2inst[sym]"
+insts <- execute(h,query) 
+insts$W <- rep(NA,nrow(insts))
+insts$Neff <- rep(NA,nrow(insts))
+
+for(i in 1:nrow(insts)){
+  inst <- insts$inst[i]
+  query <- paste("update perOfTotal:v*100%sum(v) from update time2expir:expir-min(expir) 
+from update expir: sym2expir[sym] from select v:sum siz by sym from trade where date 
+within 2017.07.31 2017.09.01,sym2inst[sym]=","`",inst,sep = "")
+volData <- execute(h, query)
+print(ggplot(volData, aes(x=time2expir, y=perOfTotal)) +geom_line(color='green') +
+        geom_point() + ylab("Percentage of total volume") + 
+        xlab("Months to expiration") + ggtitle(paste(inst,"2017-07-31 to 2017-09-01")))
+
+W = sum(-volData$perOfTotal/100*log(volData$perOfTotal/100))
+Neff = exp(W)
+insts$W[i] <- W
+insts$Neff[i] <- Neff
+}
+
+knitr::kable(insts)
+
+```
+
+EuroDollar(GE) has large $N_{eff}$, i.e. more than a few maturities active at a time. 
+
+## Question 3
+# functions to get eta and avq2t trade data
+```{r, cache=TRUE}
+
+getEta<- function(h, sym, date){
+  arg <- paste("[",gsub("-",".",date),";","`",sym,"]", sep="")
+  query<- paste("{[d;s] select eta:(sum 1-rev)%(sum rev) from update rev:differ up from 
+                select up:chg>0 from select chg:deltas prc from 
+                (select prc,diff:differ prc from trade where date=d,sym=s) where diff}",
+                arg,sep="")
+return(execute(h,query)$eta)
+}
+
+getAvQ2T<- function(h, sym, date){
+    arg <- paste("[",gsub("-",".",date),";","`",sym,"]", sep="")
+    query <- paste("{[d;s]select avq2t from update avq2t: (bszsum + aszsum)%tszsum from
+                   select bszsum: sum bsiz, aszsum: sum asiz, tszsum: sum tradesiz from
+                   select from aj[ `seq; select distinct seq,tradesiz:siz from trade where 
+                   date=d, sym=s;select seq,bsiz,asiz from quote where date=d, sym=s] where
+                   not null bsiz}", arg, sep="")
+ return(execute(h, query)$avq2t)
+}
+```
+
+
+```{r, cache=TRUE}
+# select the most active instrument on a particular date for the date 
+# range and calculate the parameters
+# interest rate products
+h <- open_connection('kx',6009)
+query <- "{[range] select first sym by inst, date from `inst`cumvol 
+          xdesc update inst:sym2inst[sym] from select cumvol:sum siz by sym,date 
+          from trade where date within range, not null sym2inst[sym]}[2017.08.01 2017.08.31]" 
+intProdDf <- execute(h, query)
+
+# get the eta and avq2t for the most active symbol
+intProdDf$eta <- apply(intProdDf,1,function(x) getEta(h,x['sym'],x['date']))
+intProdDf$avq2t <- apply(intProdDf,1,function(x) getAvQ2T(h,x['sym'],x['date']))
+
+# aggregate the data on per instrument basis
+intPDf <- intProdDf %>% group_by(inst) %>% summarise(eta=mean(eta),
+                                                     avq2t=mean(avq2t))
+
+# non-interest rate products
+h <- open_connection('kx',7009)
+query <- "{[range] select first sym by inst, date from `inst`cumvol xdesc 
+          update inst:sym2inst[sym] from select cumvol:sum siz by sym,date
+          from trade where date within range, not null sym2inst[sym]}[2017.08.01 2017.08.31]" 
+nonIntProdDf <- execute(h, query)
+
+# get the eta and avq2t for the most active symbol
+nonIntProdDf$eta <- apply(nonIntProdDf,1,function(x) getEta(h,x['sym'],x['date']))
+nonIntProdDf$avq2t <- apply(nonIntProdDf,1,function(x) getAvQ2T(h,x['sym'],x['date']))
+
+# aggregate the data on per instrument basis
+nonIntPDf <- nonIntProdDf %>% group_by(inst) %>% summarise(eta=mean(eta),
+                                                           avq2t=mean(avq2t))
+
+```
+
+
+
+
+```{r, cache=TRUE}
+# plot the data
+plotDf <- rbind(nonIntPDf,intPDf)
+ggplot(plotDf,aes(x=avq2t, y=eta)) + geom_text(aes(label=inst), size=3) + 
+  xlab("Average quote size/average aggresive trade size") + 
+  ylab(expression("Reversion parameter "*eta)) +
+  scale_x_continuous(trans="log", breaks=c(2,5,10,20,50,100,200,500,1000,2000)) + 
+  scale_y_continuous(limits=c(0,1.5)) + ggtitle("2017-07-31 to 2017-09-01")
+```
+
