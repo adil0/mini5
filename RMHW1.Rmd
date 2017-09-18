@@ -1,0 +1,373 @@
+---
+title: "RMHW1"
+author: "Adil Hayat"
+date: "2 September 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(0)
+library(tidyverse)
+library(OptionPricing)
+library(ggplot2)
+```
+
+```{r}
+theta <- function(type, S, X, t, r, v)
+{
+    d1 <- (log(S/X)+(r+ 0.5 * v^2) * t) / ( v * sqrt(t))
+    d2 <- d1 - v * sqrt(t)
+    if(type =="p")	# put
+    {
+    	p1 <- -S * exp(-d1^2/2) * v / (2 * sqrt(2 * pi * t) )
+        p2 <- r * X * exp(-r * t) * pnorm(1 - pnorm(d2))	        
+        p1 + p2
+    }
+    else	# call	
+    {
+	   p1 <- -S * exp(-d1^2/2) * v / (2 * sqrt(2 * pi * t) ) 
+	   p2 <- r * X * exp(-r * t) * pnorm(d2);	        
+	   p1 - p2
+	}
+}
+```
+
+
+## Problem 1(a)
+```{r}
+N <- 1000000
+initCap <- 10000
+mu <- 0
+sigma <- 0.2
+dfT <- 4
+sigmaT <- sigma*sqrt((dfT-2)/dfT)
+del <- 1/250
+quantVec <- c(0.9,0.95,0.975,0.99,0.995)
+compDf <- data.frame(matrix(nrow=length(quantVec),ncol=5))
+colnames(compDf) <- c("Quantile","VaR_Normal","VaR_Tdist","ES_Normal","ES_Tdist")
+compDf$Quantile <- quantVec
+  
+# normally distributed 
+Z <- rnorm(N)
+Lnorm <- -1*initCap*(mu*del + sigma*sqrt(del)*Z)
+quantNorm <- quantile(Lnorm, quantVec)
+compDf$VaR_Normal <- quantNorm 
+for(i in 1:length(quantNorm)){
+  compDf$ES_Normal[i] <- mean(Lnorm[Lnorm>=quantNorm[i]])
+}
+
+# t-distributed
+Tvals <- rt(N,4) 
+LT <- -1*initCap*(mu*del + sigmaT*sqrt(del)*Tvals)
+quantT <- quantile(LT,quantVec)
+compDf$VaR_Tdist <- quantT
+for(i in 1:length(quantT)){
+  compDf$ES_Tdist[i] <- mean(LT[LT>=quantT[i]])
+}
+
+knitr::kable(compDf)
+```
+
+We observe that the VaR values for the t-distribution are higher than those obtained from the Normal distribution at higher values of $\alpha$. Also the Expected Shortfall in the case with t-distribution are higher than those compared to the Normal distribution for higher values of $\alpha$. The relationship doesn't hold for lower values of $\alpha$
+
+## Problem 1(b)
+```{r}
+N <- 10000
+numStocks <- 10
+initCap <- 1000
+mu <- 0
+sigma <- 0.2
+dfT <- 4
+sigmaT <- sigma*sqrt((dfT-2)/dfT)
+del <- 1/250
+quantVec <- c(0.9,0.95,0.975,0.99,0.995)
+compDf <- data.frame(matrix(nrow=length(quantVec),ncol=5))
+colnames(compDf) <- c("Quantile","VaR_Normal","VaR_Tdist","ES_Normal","ES_Tdist")
+compDf$Quantile <- quantVec
+
+normMatrix <- matrix( rnorm(numStocks*N), numStocks, N) 
+
+Lmatrix <- -1*initCap*(mu*del + sigma*sqrt(del)*normMatrix)
+Lnorm <- apply(Lmatrix,MARGIN = 2, sum)
+
+quantNorm <- quantile(Lnorm, quantVec)
+compDf$VaR_Normal <- quantNorm 
+for(i in 1:length(quantNorm)){
+  compDf$ES_Normal[i] <- mean(Lnorm[Lnorm>=quantNorm[i]])
+}
+
+
+tMatrix <- matrix( rt(numStocks*N,4), numStocks, N) 
+Lmatrix <- -1*initCap*(mu*del + sigma*sqrt(del)*tMatrix)  
+ 
+LT <- apply(Lmatrix,MARGIN = 2, sum)
+quantT <- quantile(LT,quantVec)
+compDf$VaR_Tdist <- quantT
+for(i in 1:length(quantT)){
+  compDf$ES_Tdist[i] <- mean(LT[LT>=quantT[i]])
+}
+
+knitr::kable(compDf)
+```
+
+We observe that the VaR values for the t-distribution are higher than those obtained from the Normal distribution at all values of $\alpha$. Also the Expected Shortfall in the case with t-distribution are higher than those compared to the Normal distribution for all values of $\alpha$. These values look correct intuitively too unlike the case in part (a).
+
+
+## Problem 1(c)
+```{r}
+N <- 10000
+initCap <- 10000
+numDays <- 10
+mu <- 0
+sigma <- 0.2
+dfT <- 4
+sigmaT <- sigma*sqrt((dfT-2)/dfT)
+del <- 1/250
+quantVec <- c(0.9,0.95,0.975,0.99,0.995)
+compDf <- data.frame(matrix(nrow=length(quantVec),ncol=5))
+colnames(compDf) <- c("Quantile","VaR_Normal","VaR_Tdist","ES_Normal","ES_Tdist")
+compDf$Quantile <- quantVec
+  
+# normally distributed 
+normMatrix <- matrix( rnorm(numDays*N), numDays, N) 
+Zvalues <- apply(normMatrix, MARGIN = 2, sum) 
+Lnorm <- -1*initCap*(mu*del + sigma*sqrt(del)*Zvalues)
+
+quantNorm <- quantile(Lnorm, quantVec)
+compDf$VaR_Normal <- quantNorm 
+for(i in 1:length(quantNorm)){
+  compDf$ES_Normal[i] <- mean(Lnorm[Lnorm>=quantNorm[i]])
+}
+
+# t-distributed
+tMatrix <- matrix( rt(numDays*N,4), numDays, N) 
+tValues <- apply(tMatrix,MARGIN = 2, sum)
+LT <- -1*initCap*(mu*del + sigma*sqrt(del)*tValues)  
+
+quantT <- quantile(LT,quantVec)
+compDf$VaR_Tdist <- quantT
+for(i in 1:length(quantT)){
+  compDf$ES_Tdist[i] <- mean(LT[LT>=quantT[i]])
+}
+
+knitr::kable(compDf)
+
+```
+
+We observe that the using the estimate that 10-day _VaR_ is $\sqrt10$ times 1-day _VaR_ overstates the value of _VaR_ in the case of daily log returns being Normally distributed(actual value being 907.17 while estimated value being 930.34) while for the case with t-distribution the _VaR_ value is understated(actual value being 1347.61 while estimated value being 1057.75).
+
+##Problem 2(a)
+```{r}
+N <- 1000
+alpha <- 0.99
+nValues <- c(100, 1000, 10000)
+
+compDf <- data.frame(matrix(nrow=length(nValues),ncol=5))
+colnames(compDf) <- c("n","thMean","sampleMean","thVariance","sampleVariance")
+compDf$n <- nValues
+
+for(i in 1:length(nValues)){
+  n <- nValues[i]
+## Theoretical values
+thMean <- qnorm(alpha) 
+thVar <- alpha*(1-alpha)/(n*(dnorm(qnorm(alpha)))^2)
+
+normMatrix <- matrix(rnorm(N*n),nrow = n, ncol=N)
+  
+sampleVaRs <- apply(normMatrix,MARGIN = 2, function(x){return(quantile(x,alpha))})
+
+sampleMean <- mean(sampleVaRs)
+sampleVar <- var(sampleVaRs)  
+
+# populate the values
+compDf$thMean[i] <- thMean
+compDf$thVariance[i] <- thVar
+compDf$sampleMean[i] <- sampleMean
+compDf$sampleVariance[i] <- sampleVar
+
+
+# make the qqplot
+qqnorm(sampleVaRs)  
+qqline(sampleVaRs,distribution = qnorm,col="red")
+}
+
+knitr::kable(compDf)
+```
+
+## Problem 2(b) 
+```{r}
+N <- 1000
+alpha <- 0.99
+nValues <- c(100, 1000, 10000)
+df <- 5
+compDf <- data.frame(matrix(nrow=length(nValues),ncol=5))
+colnames(compDf) <- c("n","thMean","sampleMean","thVariance","sampleVariance")
+compDf$n <- nValues
+
+for(i in 1:length(nValues)){
+  n <- nValues[i]
+  ## Theoretical values
+  thMean <- qt(alpha,df) 
+  thVar <- alpha*(1-alpha)/(n*(dt(qt(alpha,df),df))^2)
+  
+  tMatrix <- matrix(rt(N*n, df),nrow = n, ncol=N)
+    
+  sampleVaRs <- apply(tMatrix,MARGIN = 2, function(x){return(quantile(x,alpha))})
+  
+  # populate the values
+  compDf$thMean[i] <- thMean
+  compDf$thVariance[i] <- thVar
+  compDf$sampleMean[i] <- mean(sampleVaRs)
+  compDf$sampleVariance[i] <- var(sampleVaRs)  
+  
+  
+  # make the qqplot
+  qqplot(rt(n, df), sampleVaRs, main="Q-Q plot", xlab= "Theoretical Quantiles",
+         ylab="Sample Quantiles")
+}
+
+knitr::kable(compDf)
+```
+
+
+
+## Problem 2(c)
+```{r}
+df <- 5
+N <- 1000
+alpha <- 0.99
+nValues <- c(100, 1000, 10000)
+
+compDf <- data.frame(matrix(nrow=length(nValues),ncol=5))
+colnames(compDf) <- c("n","sampleMeanNormal","sampleVarianceNormal",
+                      "sampleMeanT","sampleVarianceT")
+compDf$n <- nValues
+
+for(i in 1:length(nValues)){
+  n <- nValues[i]
+
+  normMatrix <- matrix(rnorm(N*n),nrow = n, ncol=N)
+  tMatrix <- matrix(rt(N*n, df),nrow = n, ncol=N)
+  
+  sampleShortfallNormal <- apply(normMatrix,MARGIN = 2, function(x)
+                          {return(mean(x[x>quantile(x,alpha)]))})
+  sampleShortfallT <- apply(tMatrix,MARGIN = 2, function(x)
+                      {return(mean(x[x>quantile(x,alpha)]))})
+
+  
+  # populate the values
+  compDf$sampleMeanNormal[i] <- mean(sampleShortfallNormal)
+  compDf$sampleVarianceNormal[i] <- var(sampleShortfallNormal)
+  compDf$sampleMeanT[i] <- mean(sampleShortfallT)
+  compDf$sampleVarianceT[i] <- var(sampleShortfallT)
+}
+
+knitr::kable(compDf)
+```
+
+
+## Problem 3
+```{r}
+alpha <- 0.99
+N <- 1000
+numCalls <- 10
+numPuts <- 5
+numStocks <- 10
+S0 <- 100
+timeRem <- 0.1
+sig <- 0.4
+del <- 0.04
+rfr <- 0.05
+
+delStock <- S0*sig*sqrt(del)*matrix(rnorm(N*numStocks), nrow = numStocks, ncol = N)
+finalStock <- matrix(rep(S0,N*numStocks),nrow = numStocks,ncol = N) + delStock
+
+# calculate the initial portfolio value
+callValue <- BS_EC(timeRem,S0,rfr,sig,S0)
+putValue <- BS_EP(timeRem,S0,rfr,sig,S0)  
+initCallPrice <- callValue[['price']]
+initPutPrice <- putValue[['price']]
+initCallDelta <- callValue[['delta']]
+initPutDelta <- putValue[['delta']]
+initCallGamma <- callValue[['gamma']]
+initPutGamma <- putValue[['gamma']]
+initCallTheta <- theta("c", S = S0,X = S0, t = timeRem, r = rfr, v = sig)
+initPutTheta <-  theta("p", S = S0,X = S0, t = timeRem, r = rfr, v = sig)
+initPortValue <- numStocks*S0-numStocks*(numCalls*initCallPrice + numPuts*initPutPrice)
+
+
+# calculate the final portfolio value W/O approximation
+callPrices <- numCalls*apply(finalStock,MARGIN = c(1,2),
+                             function(x)(BS_EC(timeRem-del,S0,rfr,sig,x)[["price"]]))
+putPrices <- numPuts*apply(finalStock,MARGIN = c(1,2),
+                           function(x)(BS_EP(timeRem-del,S0,rfr,sig,x)[["price"]])) 
+
+finalPortValue <- apply(finalStock,MARGIN = 2,sum) - apply(callPrices,MARGIN = 2,sum) - 
+            apply(putPrices,MARGIN = 2,sum)
+
+thLosses <- initPortValue - finalPortValue
+
+# calculate the values using delta method
+callLosses <- -1*numCalls*(initCallTheta*del + initCallDelta*delStock + 
+                             0.5*initCallGamma*delStock^2)
+putLosses <- -1*numPuts*(initPutTheta*del + initPutDelta*delStock + 
+                           0.5*initPutGamma*delStock^2)
+
+appxLosses <- apply(delStock,MARGIN = 2,sum) - apply(callLosses,MARGIN = 2, sum) - 
+  apply(putLosses,MARGIN = 2,sum)
+  
+combDat = data.frame(thLosses, appxLosses)
+ggplot(combDat,aes(thLosses, appxLosses)) + geom_point()+
+  ylab("Delta-Gamma Approximation") + xlab("Actual Portfolio Loss")
+
+cat("VaR(0.99)=", quantile(thLosses,0.99),"\n")  
+```
+
+
+## Problem 4
+The value of the VaR(0.99) is given by $\frac{\sigma}{\sqrt250}*\phi^{-1}(\alpha)$ = `r 0.3/sqrt(250)*qnorm(0.99)`
+So, (c) is correct.
+
+## Problem 5
+(a) is the correct answer since the normal distribution will have heavier tails than the leptokutic distribution and will overstate the value.
+
+## Problem 6
+Initially, 
+${\sigma_A} = \frac{100*0.25}{\sqrt{250}}`$
+${\sigma_B} = \frac{50*0.2}{\sqrt{250}}$
+
+${\sigma_{A+B}} = \sqrt{{\sigma_A^2 + \sigma_B^2 + 2\rho\sigma_A\sigma_B}}$
+$VaR = \phi^{-1}(\alpha){\sigma_{A+B}}$
+
+Finally,
+${\sigma_A} = \frac{50*0.25}{\sqrt{250}}`$
+${\sigma_B} = \frac{100*0.2}{\sqrt{250}}$
+
+```{r}
+rho <- 0.2
+sigA <- 100*0.25/sqrt(250)
+sigB <- 50*0.2/sqrt(250)
+sigAB <- sqrt(sigA^2+sigB^2+2*rho*sigA*sigB)
+initVar <- qnorm(0.99)*sigAB  
+cat("Initial Var(0.99)= ", initVar,"\n")
+
+
+sigA1 <- 50*0.25/sqrt(250)
+sigB1 <- 100*0.2/sqrt(250)
+sigAB1 <- sqrt(sigA1^2+sigB1^2+2*rho*sigA1*sigB1)   
+finalVar = qnorm(0.99)*sigAB1
+cat("Final Var(0.99)= ", finalVar,"\n")
+
+cat("Difference between initial and final VaRs= ", finalVar - initVar)
+```
+Therefore, option(b) is correct.
+
+
+## Problem 7
+The correct answer is (d) because on an average we would expect the 95% var to be breached ~13 times but if the value is not breached then VaR value is set too conservatively.
+
+## Problem 8
+The correct answer is (d) as the number of outliers and the one-day holding period is used.

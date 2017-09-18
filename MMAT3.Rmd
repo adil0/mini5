@@ -1,0 +1,20 @@
+---
+title: "MMAT3"
+author: "Adil Hayat, Yijing Tao"
+date: "16 September 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+

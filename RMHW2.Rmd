@@ -1,0 +1,28 @@
+---
+title: "RMHW2"
+author: "Adil Hayat"
+date: "13 September 2017"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Write down your observations about leverage ratio, risk weighted assets, risk weights and loss rates and provide your explanations from the Basel regulation perspective.**
+
+The leverage ratio remians unchanged with the change in the regulations across the various Basel accords. The total risk weighted assets increase across the accords with the increase being primarliy contibuted by change in the regulation around the incorporation of market risk in the RWA calculation. The swap hedge market risk increases by 4 times in Basel 2.5 and Basel 3 with respect to Basel 1 as described in the regulation. Similar pattern can be observed in the risk weights with the values being much higher for Basel 2.5 and Basel 3. The loss rates are again higher as reflected in the higher risk weights.
+
+## Problem 2
+If we assume 15-day VaR to be correct, then $VaR(20-day)=$`r 465*sqrt(20/15)` and $VaR(25-day)=$`r 465*sqrt(25/15)` but $VaR(10-day)=$`r 465*sqrt(10/15)` which is inconsistent with the value given in option (a). So, (a) is the correct answer.
+
+## Problem 3
+Tier I capital consists of Equity capital, retained earnings and disclosed reserves. So, the correct answer is (a)
+
+## Problem 5
+The on-balance-sheet credit risk charge will be `r 0.5*100000000*0.08`. So, the correct answer is (b)
+
+## Problem 6
+Option (b) as correct as Basel II introduced capital standards for market and operational risk for the first time.

@@ -1,0 +1,60 @@
+---
+title: "Untitled"
+author: "Adil Hayat"
+date: "12 September 2017"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+###Question 2(a)
+$V=\sigma^2\mathbf{\beta\beta^T+D}$             
+We have to show that:
+
+$\mathbf{V^{-1}} = \mathbf{D^{-1}}- \frac{\sigma^2}{1+\sigma^2\mathbf{\beta^TD^{-1}\beta}}\mathbf{D^{-1}\beta\beta^TD^{-1}}$
+
+From Shermann-Morisson-Woodbury matrix inverse formula, we have
+
+$\mathbf{(A+uv^T)^{-1}}=\mathbf{A^{-1}}-\frac{\mathbf{A^{-1}uv^TA^{-1}}}{1+\mathbf{v^TA^{-1}u}}$  (2)
+
+Using, $u=\sigma\mathbf{\beta}$ and $v=\sigma\mathbf{\beta}$, and from (2) we have 
+
+$V^{-1}=(D+\sigma^2\mathbf{\beta\beta^T})^{-1}$
+
+Using (1), we have $LHS= RHS$               
+
+### Question 2(b)
+$\sigma_{MV}^2=\frac{1}{\mathbf{1^TV^{-1}1}}$ (1)
+
+$\beta_{LS} = \frac{1+\sigma^2\mathbf{\beta^TD^{-1}\beta}}{\mathbf{\sigma^2\beta^TD^{-1}1}}$  (2)
+
+$x_i=\frac{\sigma_{MV}^2}{\omega^2_i}(1-\frac{\beta_i}{\beta_{LS}})$  (3)
+
+Representing the equation (3) in matrix form, we have,
+
+$\mathbf{X}=\mathbf{\sigma_{MV}^2D^{-1}(1}-\frac{1}{\beta_{LS}}\mathbf{\beta)}$(4)
+              
+We know that the solution to min. variance portfolio is given by,
+
+$\mathbf{X}=\frac{1}{\mathbf{1^TV^{-1}1}}\mathbf{V^{-1}1}$  (5)
+
+Substituting the value of $V^{-1}$ in (5), we get
+
+$\mathbf{X}=\frac{1}{\mathbf{1^TV^{-1}1}}(\mathbf{D^{-1}-\frac{\sigma^2}{1+\sigma^2\mathbf{\beta^TD^{-1}\beta}}D^{-1}\beta\beta^TD^{-1})1}$
+
+or, 
+
+$\mathbf{X}=\frac{1}{\mathbf{1^TV^{-1}1}}(\mathbf{D^{-1}1-\frac{\sigma^2}{1+\sigma^2\mathbf{\beta^TD^{-1}\beta}}D^{-1}\beta\beta^TD^{-1}1)}$
+
+Dividing both the numerator and denominator by $\sigma^2\mathbf{\beta D^{-1}1}$, we have
+
+$\mathbf{X}=\frac{1}{\mathbf{1^TV^{-1}1}}(\mathbf{D^{-1}1}-\frac{1}{\beta_{LS}}\mathbf{D^{-1}\beta})$
+
+or, 
+$\mathbf{X}=\sigma_{MV}^2(\mathbf{D^{-1}1}-\frac{1}{\beta_{LS}}\mathbf{D^{-1}\beta})$
+
+or, 
+$\mathbf{X}=\mathbf{\sigma_{MV}^2D^{-1}(1}-\frac{1}{\beta_{LS}}\mathbf{\beta)}$
+  
+which is same as (4)  
