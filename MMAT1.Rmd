@@ -1,0 +1,87 @@
+---
+title: "MMAT Assignment1"
+author: "Adil Hayat, Yijing Tao"
+date: "2 September 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rkdb)
+```
+
+1. _Our data table instinfo on the server has basic properties of all CME products.
+Read enough of Q for Mortals 9.3 to issue simple queries, and answer the following
+questions:_
+
+    (a) _What are the products whose instrument codes are PA and ZC?_
+        
+        PA: Palladium(Precious Metals)
+        
+        ZC: Corn(Grain And Oilseed)
+        
+    (b) _If you see a trade in the market data for symbol RBU7 at price 15875, what was
+the actual contract price? What is that price for gasoline in dollars per gallon?_
+      
+      The actual contract price will be $66675$. The price of gasoline per gallon was $1.5875
+      
+    (c) _If you buy one contract of RBU7 during the day at price 15875 according to
+market data, and the settlement price on that day is 15876, how much money
+does the clearing house deposit in your account?_
+      
+      The clearing house deposits $4.2 in my account.
+
+2. _What were the 5 most actively traded interest rates products on August 18, 2017?
+What were the 5 most actively traded non-interest rate products on the same date?_
+```{r}
+cat("Most Actively Traded by trade count:\n")
+### most actively traded interest rate products
+h <- open_connection('kx',6003)
+query <- "select[5] from (`nT xdesc select nT:count i by sym 
+          from trade where date=2017.08.18)"
+data <- execute(h, query)
+knitr::kable(data)
+
+### most actively traded non-interest rate products
+h <- open_connection('kx',7003)
+query <- "select[5] from (`nT xdesc select nT:count i by sym
+          from trade where date=2017.08.18)"
+data <- execute(h, query)
+knitr::kable(data)
+
+cat("Most Actively Traded by Daily Volume:\n")
+### most actively traded interest rate products
+h <- open_connection('kx',6003)
+query <- "select[5] from (`dailyVolume xdesc select dailyVolume:sum siz by sym
+          from trade where date=2017.08.18)"
+data <- execute(h, query)
+knitr::kable(data)
+
+### most actively traded non-interest rate products
+h <- open_connection('kx',7003)
+query <- "select[5] from (`dailyVolume xdesc select dailyVolume:sum siz by sym
+          from trade where date=2017.08.18)"
+data <- execute(h, query)
+knitr::kable(data)
+
+```
+
+
+3. _Make a plot of traded volume on each date in August 2017 for the front-month 10-
+Year Note Futures contract ZNU7. (There will be some interesting behavior in the last
+week of this month, which we can see after I upload it next week.)_
+```{r}
+h <- open_connection('kx',6003)
+query <- "select volume: sum siz by date from trade where sym=`ZNU7,
+          date within 2017.08.01 2017.08.31"
+data <- execute(h, query)
+ggplot(data, aes(x=factor(format(date,"%d")), y=volume/1000000)) +geom_bar(stat="identity") + 
+  ylab("Volume in Millions") + xlab("Date")
+```
+
+
+
