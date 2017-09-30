@@ -1,0 +1,254 @@
+---
+title: "RMHW3"
+author: "Adil Hayat"
+date: "20 September 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+set.seed(0)
+theme_update(plot.title = element_text(hjust = 0.5))
+```
+
+
+## Problem 1(a)
+We are given,
+
+$$\lim_{x \to \infty} x^\alpha(1-F(x)) = b$$
+
+\[
+  \begin{aligned}
+  P\bigg(\frac{M_n}{(bn)^{1/\alpha}}\bigg) &=P(M_n <= x(bn)^{1/\alpha})\\
+  & = F^n(x(bn)^{1/\alpha})\\
+  & = (1-(1-F(x(bn)^{1/\alpha})))\\
+  & = \bigg(1 - \frac{x^\alpha(bn)}{x^\alpha(bn)}(1-F(x(bn)^{1/\alpha}))\bigg)\\
+  & \approx \bigg(1-\frac{1}{x^{\alpha}n}\bigg)\\
+  & \to  e^{-x^{-\alpha}}
+  \end{aligned}
+\]
+
+So, $\{M_n/(bn)^{1/\alpha}\}^{\infty}_{n=1}$ converges weakly to a limiting Frechet distribution with cdf given by $e^{-x^{-\alpha}}$
+
+
+## Problem 1(b)
+```{r}
+alpha <- 10
+rand <- runif(1000)
+frechet <- (1/-log(rand))^(1/alpha)
+
+hist(frechet,10, freq=FALSE, main="Frechet Distribution")
+```
+
+
+## Problem 1(c)
+\[
+  \begin{aligned}
+  F(x)&=1-\bigg(\frac{c}{c+x}\bigg)^{\alpha}\\
+  U& = 1-\bigg(\frac{c}{c+x}\bigg)^{\alpha}\\
+  \frac{c}{c+x}& = (1-u)^{1/\alpha}\\
+  x& = \frac{c}{(1-u)^{1/\alpha}}-c\\
+  \end{aligned}
+\]
+
+We try to find the corresponding limiting distribution
+\[
+  \begin{aligned}
+  P\bigg(\frac{M_n-a_n}{b_n}\leq x\bigg) &= P(M_n \leq a_n + b_nx)\\
+  & = F^n(a_n + b_n x)\\
+  & = (1-(1-F(a_n + b_n x)))^n\\
+  & = \bigg(1 - \frac{c^\alpha}{(c + a_n + b_n x)^\alpha}\bigg)^n\\
+  &Substituting\hspace{0.1cm} a_n = -c \hspace{0.1cm} and \hspace{0.1cm} b_n = cn^{1/\alpha}\\
+  & \approx \bigg(1-\frac{c^\alpha}{c^{\alpha}nx^\alpha}\bigg)^n\\
+  & \approx \bigg(1-\frac{x^{-\alpha}}{n}\bigg)^n\\
+  & \to  e^{-x^{-\alpha}}
+  \end{aligned}
+\]
+ 
+ which is a Frechet distribution as in part 1(a)
+
+Let's  choose $c = 1$ and $\alpha =10$ 
+```{r, cache=TRUE}
+alpha <- 10
+c <- 1
+N <- 1000
+
+# generate the data from exact distribution
+M <- rep(0,N)
+
+for(i in 1:length(M)){
+  M[i] <- (max(c/(1-runif(250))^(1/alpha) - c) + c)/(c*i^(1/alpha))
+}
+
+# generating the frechet distribution data
+rand <- runif(N)
+frechet <- (1/-log(rand))^(1/alpha)
+
+# overlay the plots
+plotDf <- data.frame(samples=c(frechet, M))
+plotDf$dataSource <- c(rep("Frechet",N), rep("Theoretical",N))
+
+ggplot(plotDf, aes(samples, fill = dataSource)) + geom_density(alpha = 0.2) + 
+  ggtitle("Theoretical vs Estimated Frechet Distribution")
+```
+
+
+
+## Problem 2(a)
+This is the case of polynomail Frechet distribution.
+We need to find $\alpha$, b for which
+
+$$x^{\alpha}(1-F(x)) \to b \hspace{1cm} as \hspace{0.2cm} x \to \infty$$
+\[
+  \begin{aligned}
+  x^{\alpha}\int^{\infty}_{x}f_4(u)du & =  \frac{\int^{\infty}_{x}f_4(u)du}{x^{-\alpha}}\\
+  \end{aligned}
+\]
+
+Using L'Hospital Rule, 
+
+$$\frac{-f_4(x)}{-\alpha x^{-(\alpha+1)}} \to b  \hspace{0.2cm }as \hspace{0.2cm } x\to \infty$$
+Substituting the value of $f_4(x)$, we get 
+
+\[
+  \begin{aligned}
+  f_4(x) &= \frac{\Gamma\left(5/2\right)}{\sqrt{4\pi}\Gamma\left(2\right)}{\bigg(1+\frac{x^2}{4}\bigg)}^{-5/2}\\
+   & =  \frac{3}{8}{\bigg(1+\frac{x^2}{4}\bigg)}^{-5/2}\\\\
+  \end{aligned}
+\]
+
+So, we can write the limit as,
+
+\[
+  \begin{aligned}
+  \lim_{x \to \infty}\frac{\frac{3}{8}{\bigg(1+ \frac{x^2}{4}\bigg)}^{-5/2}}{\alpha x^{-(\alpha+1)}}&=b\\
+   \lim_{x \to \infty}\frac{3}{8\alpha}\frac{1}{ {\bigg(1+ \frac{x^2}{4}\bigg)}^{5/2}x^{-(\alpha+1)}}&=b\\\\
+  \end{aligned}
+\]
+
+Setting $\alpha=4$, the equation reduces to
+\[
+  \begin{aligned}
+   \lim_{x \to \infty}\frac{3}{8*4}\frac{1}{{\bigg(x^2+ \frac{1}{4}\bigg)}^{5/2}}& =b\\
+   \frac{3}{8*4}\frac{1}{\frac{1}{4}^{5/2}}& = b\\
+   b & =3\\
+  \end{aligned}
+\]
+
+
+
+## Problem 2(b)
+```{r}
+N <- 10000
+df <- 4
+rand <- -rt(N,df)
+dat <- sort(rand[rand>0],decreasing = TRUE)
+plotDat <- rep(0,length(dat)-1)
+for(i in 1:length(dat)-1){
+  plotDat[i] <- 1/(sum(log(dat[1:(i+1)]))/(i+1) - log(dat[i+1]))   
+}
+
+plotDfHill <- data.frame(dat=plotDat)
+plotDfHill$seq <- seq(2,length(dat),1)
+ggplot(plotDfHill[1:500,], aes(y=dat, x=seq)) + geom_line() + xlab("k") + 
+  ylab(expression(alpha))+geom_hline(yintercept = 3.6, color="red") +
+  annotate("text", x=200, y=4.5, label="alpha=3.6") +
+  ggtitle("Hill Plot for t-4 Distribution")
+
+```
+
+From the plot we observe that $\alpha=3.6$ which is close to the theoretical value of $\alpha=4$. 
+
+## Problem 2(c)
+```{r}
+# plot the POT plot
+dat <- sort(rand[rand>0])
+e <- rep(0,length(dat))
+
+for(i in 1:length(dat)){
+  e[i] <- sum(pmax(dat[(i+1):length(dat)]-dat[i],0))/length(dat[dat>dat[i]])
+}
+
+plotDf <- data.frame(y=e)
+plotDf$x <- dat
+
+ggplot(plotDf, aes(y=y, x=x)) + geom_line() +
+  xlab("Losses") + ggtitle("POT plot for t-4 distribution")+ ylab("e(u)")
+
+```
+
+From the plot we observe that the $\theta=0.2$.
+
+## Problem 3
+```{r, cache=TRUE}
+df <- read.csv("ibm091716.csv")
+
+# plot the hill plot
+ret <- -df$return
+dat <- sort(ret[ret>0],decreasing = TRUE)
+plotDat <- rep(0,length(dat)-1)
+for(i in 1:length(dat)-1){
+  plotDat[i] <- 1/(sum(log(dat[1:(i+1)]))/(i+1) - log(dat[i+1]))   
+}
+
+plotDfHill <- data.frame(dat=plotDat)
+plotDfHill$seq <- seq(2,length(dat),1)
+ggplot(plotDfHill[1:500,], aes(y=dat, x=seq)) + geom_line() + xlab("k") + 
+  ylab(expression(alpha)) + geom_hline(yintercept = 3.4, color="red")
+
+# plot the POT plot
+dat <- sort(ret[ret>0])
+e <- rep(0,length(dat))
+
+for(i in 1:length(dat)){
+  e[i] <- sum(pmax(dat[(i+1):length(dat)]-dat[i],0))/length(dat[dat>dat[i]])
+}
+
+plotDf <- data.frame(y=e)
+plotDf$x <- dat
+
+ggplot(plotDf, aes(y=y, x=x)) + geom_line() + geom_abline(intercept=0,slope=0.4, color="red") +
+  xlab("Losses") + ylab("e(u)")
+
+
+```
+
+Observing the graphs,
+The value of $\alpha$=3.4.
+This gives us the value of $\theta$= 0.28
+
+
+## Problem 4
+Option (b) is incorrect as EVT highlights the distributions justified by central limit theorem cannot be used for extreme value estimation.
+
+
+## Problem 5
+Option (d) is the only incorrect option as we do not ignore extreme events.
+
+
+## Problem 6
+The information ration $IR=$ `r (7.8-7.2)/1.25`. The number of years for which the performance should persist can be derived as:
+$\frac{0.6T}{1.25\sqrt{T}}>=1.96$ which implies that T>=16.7. So, option (a) is correct.
+
+
+## Problem 7
+Assuming the risk-free rate to be 5% and filling the values in the table.
+\begin{table}[ht!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|}
+        \hline
+        Fund & Expected Return & Volatility & Absolute Risk & Information Ratio & Exp. Residual Ret. & Sharpe Ratio \\\hline\hline
+        A & 8.4\% & 14.3\% & 1.82\% & 1.1 &  2\%    & 0.237\\\hline
+        B & 8.56 & 16.4\% & 2.4\% & 0.9 &  2.16\%  &    0.217\\\hline
+        C & 8.35 & 17.8\% & 1.5\% & 1.3 &  1.95\% & 0.188\\\hline
+        D & 8.5\% & 19.1\% & 1.8\% & 1.17 & 2.1\% & 0.183\\\hline
+    \end{tabular}
+    \caption{Fund Performance}
+\end{table}
+
+Using the values in the table above, we see that only fund A and B satisfy the guidelines (I) and (II) with Fund D having the highest information ratio, So, Fund A should be chosen. 
+
+

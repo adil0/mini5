@@ -1,0 +1,72 @@
+---
+title: "FOHW3"
+author: "Adil Hayat"
+date: "18 September 2017"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Problem 3(a)
+
+$\hspace{100pt}(1)\hspace{10pt} r_A=\alpha_A + \beta_Ar_M + \epsilon_A$ 
+
+$\hspace{100pt}(2)\hspace{10pt}r_P(w)=wr_A+(1-w)r_M$
+
+The return of the portfolio is given by:
+
+$\hspace{100pt}r_P = w\alpha_A + (1-w+w\beta_A)r_M + w\epsilon_A$
+
+Hence, the expected return of the portfolio is given by:
+
+$\hspace{100pt}\mu_P = w\alpha_A + (1-w+w\beta_A)\mu_M$
+
+The variance of the portfolio is given by:
+
+$\hspace{100pt}Var(r_P) = (1-w+w\beta_A)^2\sigma^2_M+ w^2\omega^2_A$
+
+If $\beta=1$, the sharpe ratio is given by:
+
+$\hspace{100pt}(3)\hspace{10pt}S_P = \frac{w\alpha_A + \mu_M}{\sqrt{\sigma^2_A+w^2\omega^2_A}}$
+
+Taking derivative w.r.t to w and simplifying we get,
+
+$\hspace{100pt}0= \alpha_A - \frac{(w\alpha_A + \mu_M)w\omega^2_A}{\sigma^2_M+w^2\omega^2_A}$
+
+or,
+
+$\hspace{100pt}w_0= \frac{\alpha_A/\omega^2_A}{\mu_M/\sigma^2_M}$
+
+##Problem 3(b)
+The sharpe ratio is given by,
+
+$\hspace{100pt}(3)\hspace{10pt}S^2_P = \frac{(w\alpha_A + \mu_M)^2}{\sigma^2_A+w^2\omega^2_A}$
+
+Substituting the value of $w_0$ obtained in part(a) above in (3), we get
+
+$\hspace{100pt}\hspace{10pt}S^2_P = \frac{(\frac{\alpha_A^2/w^2_A}{\mu_M/\sigma^2_M} + \mu_M)^2}{\sigma^2_A+\frac{\alpha^2_A/\omega^4_A}{\mu^2_M/\sigma^4_A}\omega^2_A}$
+
+or,
+
+$\hspace{100pt}\hspace{10pt}S^2_P = \frac{\Bigg(\frac{\alpha_A^2}{\omega^2_A} + \frac{\mu_M^2}{\sigma^2_M}\Bigg)^2\frac{1}{\mu^2_M/\sigma^4_M}}{\Bigg(\frac{\mu^2_M}{\sigma^2_M}+\frac{\alpha^2_A}{\omega^2_A}\Bigg)\frac{1}{\mu^2_M/\sigma^4_M}}$
+
+or,
+
+$\hspace{100pt}\hspace{10pt}S^2_P = \frac{\alpha^2_A}{\omega^2_A} + \frac{\mu^2_M}{\sigma^2_M}$
+
+or, 
+
+$\hspace{100pt}\hspace{10pt}S^2_P = S^2_M + IR^2_A=\frac{\alpha^2_A}{\omega^2_A} + \frac{\mu^2_M}{\sigma^2_M}$
+
+
+
+
+
+
+
+

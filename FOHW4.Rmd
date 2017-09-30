@@ -1,0 +1,197 @@
+---
+title: "FOHW4"
+author: "Adil Hayat, Yijing Tao"
+date: "28 September 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1(a)
+\begin{table}[ht!]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Stock & Weight \\\hline\hline
+        DGX & 0.222 \\\hline
+        STZ & 0.218 \\\hline
+        NTAP & 0.244 \\\hline
+        LH & 0.128 \\\hline
+        XTO & 0.187 \\\hline
+    \end{tabular}
+    \caption{Highest Volatility Minimum Tracking Error portfolio}
+\end{table}
+
+The tracking error in this case was 698.19
+
+## Question 1(b)
+Using the forward selection approach I was able to find a portfolio with lower tracking error than in 1(a) with value 77.236.
+
+\begin{table}[ht!]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Stock & Weight \\\hline\hline
+        MKC & 0.221 \\\hline
+        NE & 0.200 \\\hline
+        DGX & 0.175 \\\hline
+        TIF & 0.140 \\\hline
+        SVU & 0.264 \\\hline
+    \end{tabular}
+    \caption{Forward Selection Minimum Tracking Error portfolio}
+\end{table}
+
+
+## Question 1(c)
+Using clustering, I was not able to select a stock with a lower tracking error than obtained in part(b). 
+\begin{table}[ht!]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Stock & Weight \\\hline\hline
+        DGX & 0.195 \\\hline
+        SVU & 0.275 \\\hline
+        NTAP & 0.122 \\\hline
+        FDO & 0.287 \\\hline
+        ABC & 0.122 \\\hline
+    \end{tabular}
+    \caption{Clustering Minimum Tracking Error portfolio}
+\end{table}
+
+The stocks selected were DGX, SVU, NTAP, FDO, ABC and the tracking error is 116.12 .
+
+
+
+## Question 2(a)
+Using homogenization, the problem can be reduced to by taking $\textbf{z}=k\textbf{x}$ 
+$$ min\ \textbf{z}^T\textbf{Vz} \ such \ that\ \textbf{1}^T\textbf{z}=k$$
+\[
+  \begin{aligned}
+  Using\ Lagrangian, we get the foloowing equations\\
+  2\textbf{Vz} - \lambda \boldsymbol{\mu} &= 0 \ and\ \mathbf{1^Tz} = k\\
+  \mathbf{z}& =  \frac{1}{2} \lambda\mathbf{V^{-1}} \boldsymbol{\mu}\\
+  \mathbf{1^Tz}& =  \frac{1}{2} \lambda\mathbf{1^TV^{-1}} \boldsymbol{\mu}\\
+  k& =  \frac{1}{2} \lambda\mathbf{1^TV^{-1}} \boldsymbol{\mu}\ (using \textbf{1}^T\textbf{z}=k)\\
+  \lambda &= \frac{2k}{\mathbf{1^TV^{-1}\boldsymbol{\mu}}}\\
+  \mathbf{z} &= \frac{k}{\mathbf{1^TV^{-1}\boldsymbol{\mu}}} \mathbf{V^{-1}} \boldsymbol{\mu}\\
+  \mathbf{x} &= \frac{1}{\mathbf{1^TV^{-1}\boldsymbol{\mu}}} \mathbf{V^{-1}} \boldsymbol{\mu}\\
+  \end{aligned}
+\]
+
+
+## Question 2(b)
+As $\mathbf{x_B}$ is a fully invested benchmark portfolio, $\mathbf{1^Tx_B}=1$
+Since, $\boldsymbol{\mu} = \delta\mathbf{Vx_B}$
+
+Using solution from part(a),
+\[
+  \begin{aligned}
+  \mathbf{x} &= \frac{1}{\mathbf{1^TV^{-1}\boldsymbol{\mu}}} \mathbf{V^{-1}} \boldsymbol{\mu}\\
+   &= \frac{1}{\mathbf{1^TV^{-1}\delta\mathbf{Vx_B}}} \delta\mathbf{V^{-1}}\mathbf{Vx_B}\\
+   &=\frac{1}{\mathbf{1^T\delta\mathbf{Ix_B}}} \delta\mathbf{Ix_B}\\
+   &=\frac{1}{\mathbf{1^TIx_B}} \mathbf{Ix_B}\\
+   &=\frac{1}{\mathbf{1^Tx_B}} \mathbf{x_B}\\
+   Since\ \mathbf{1^Tx_B}=1,\\
+   \mathbf{x} &= \mathbf{x_B}
+  \end{aligned}
+\]
+
+## Question 2(c)
+###(i)
+The optimality conditions are given by the following equations,
+\[
+  \begin{aligned}
+  \mathbf{Q^{-1}({\boldsymbol{\pi - \mu})}} + \lambda\mathbf{P^T}&= 0\\
+   \mathbf{P\boldsymbol{\mu}}&= \mathbf{q}\\
+  \end{aligned}
+\]
+
+##(ii)
+
+\[
+  \begin{aligned}
+  \mathbf{Q^{-1}({\boldsymbol{\pi - \mu})}}&=  \lambda\mathbf{P^T} \ (1)\\
+   ({\boldsymbol{\pi - \mu}}) &=  \lambda\mathbf{QP^T}\\
+   ({\boldsymbol{P\pi - P\mu}}) &=  \lambda\mathbf{PQP^T}\\
+   ({\boldsymbol{P\pi - q}}) &=  \lambda\mathbf{PQP^T}\\
+   \lambda &=  (\mathbf{PQP^T})^{-1}({\boldsymbol{P\pi - q}})\\
+   Using \ (1) \ again,\\
+   \mathbf{Q^{-1}({\boldsymbol{\pi - \mu})}}&=  \mathbf{P^T}(\mathbf{PQP^T})^{-1}({\boldsymbol{P\pi - q}})\\
+   ({\boldsymbol{\pi - \mu}})&=  \mathbf{QP^T}(\mathbf{PQP^T})^{-1}({\boldsymbol{P\pi - q}})\\
+   ({\boldsymbol{\pi - \mu}})&=  \mathbf{QP^T}(\mathbf{PQP^T})^{-1}({\boldsymbol{P\pi - q}})\\
+   {\hat{\boldsymbol{\mu}}}&= \boldsymbol{\pi} + \mathbf{QP^T}(\mathbf{PQP^T})^{-1}({\boldsymbol{q-P\pi}})\\
+  \end{aligned}
+\]
+
+
+
+## Question 2(d)
+We are given, $\boldsymbol{\pi}=\delta\mathbf{Vx_B}$ and $\mathbf{V}=\mathbf{Q}$ and $\mathbf{P}\boldsymbol{\mu}=\mathbf{q}$ 
+Using result from part(c), we have
+
+\[
+  \begin{aligned}
+   {\boldsymbol{\mu}}&= \boldsymbol{\pi} + \mathbf{VP^T}(\mathbf{PVP^T})^{-1}({\boldsymbol{q-P\pi}})\\
+   \mathbf{V^{-1}}{\boldsymbol{\mu}}&= \mathbf{V^{-1}}\boldsymbol{\pi} + \mathbf{V^{-1}VP^T}(\mathbf{PVP^T})^{-1}({\boldsymbol{q-P\pi}})\\
+   &= \mathbf{V^{-1}}\boldsymbol{\pi} + \mathbf{V^{-1}VP^T}(\mathbf{PVP^T})^{-1}({\boldsymbol{q-P\pi}})\\
+   &= \delta\mathbf{V^{-1}Vx_B} + \mathbf{P^T}(\mathbf{PVP^T})^{-1}\mathbf{P}({\boldsymbol{\mu - \pi}})\\
+   &= \delta\mathbf{x_B} + \mathbf{P^T}(\mathbf{PVP^T})^{-1}\mathbf{P}({\boldsymbol{\mu - \pi}})\\
+\mathbf{1^TV^{-1}\boldsymbol{\mu}}&= \delta + \mathbf{1^TP^T}(\mathbf{PVP^T})^{-1}\mathbf{P}({\boldsymbol{\mu - \pi}})\\
+or, \mathbf{x} &= \frac{\delta\mathbf{x_B} + \mathbf{P^T}(\mathbf{PVP^T})^{-1}\mathbf{P}({\boldsymbol{\mu - \pi}})}{\delta + \mathbf{1^TP^T}(\mathbf{PVP^T})^{-1}\mathbf{P}({\boldsymbol{\mu - \pi}})}\\
+  \end{aligned}
+\]
+
+which can be represented in the form $\lambda\mathbf{x_B + P^Tv}$
+
+
+## Question 3(a)
+We are given,
+$$\mathbf{V}=\rho\boldsymbol{\sigma\sigma^T}  + (1-\rho)Diag(\boldsymbol{\rho})^2$$ 
+$$x_i=\frac{1}{\sum_{k=1}^{n} \frac{1}{\sigma_k}}\frac{1}{\sigma_i}$$
+Since, 
+$$RC_i(\mathbf{x})=\frac{x_i\mathbf{(Vx)}_i}{\sqrt{\mathbf{x^TVx}}}$$
+Substituing the value of $\mathbf{V} \ and \ x_i$, we get
+
+$$RC_i(\mathbf{x})=\frac{1}{\sigma_P(\mathbf{x})\sum_{k=1}^{n} \frac{1}{\sigma_k}}(\rho+n-1)$$
+which is equal for even $RC_j(\mathbf{x})$
+
+## Question 3(b)
+Using result from 2(a), we know that the solution to maximum diversification problem is
+
+$$\mathbf{x} = \frac{1}{\mathbf{1^TV^{-1}\boldsymbol{\sigma}}} \mathbf{V^{-1}} \boldsymbol{\sigma}\ (2)$$
+Using Sherman-Woodbury Matrix Inverse for V, we get
+
+\[
+  \begin{aligned}
+     \mathbf{V^{-1}} &= \frac{1}{1-\rho}Diag(1/\sigma^2) -\frac{\rho/(1-\rho)^2}{1+\rho/(1-\rho)\boldsymbol{\sigma^T}Diag(1/\sigma^2)\boldsymbol{\sigma^T}}Diag(1/\sigma^2)\boldsymbol{\sigma}\boldsymbol{\sigma^T}Diag(1/\sigma^2)\\
+     &=\frac{1}{1-\rho}Diag(1/\sigma^2) -\frac{\rho/(1-\rho)^2}{1+\rho/(1-\rho)}Diag(1/\sigma^2)\boldsymbol{\sigma}\boldsymbol{\sigma^T}Diag(1/\sigma^2)\\
+     &=\frac{1}{1-\rho}Diag(1/\sigma^2) - \frac{\rho}{(1-\rho)}Diag(1/\sigma^2)\boldsymbol{\sigma}\boldsymbol{\sigma^T}Diag(1/\sigma^2)\\
+     &=\frac{1}{1-\rho}Diag(1/\sigma^2) - \frac{\rho}{(1-\rho)}Diag(1/\sigma^2)\mathbf{I}\\
+     &=Diag(1/\sigma^2)\\
+     \mathbf{V^{-1}}{\boldsymbol{\sigma}}&=Diag(1/\sigma)\\
+     Substituting \ the\  values\ in\ 2, we\ get\\
+     x_i &= \frac{1}{\sum_{k=1}^{n}\frac{1}{\sigma_k}}\frac{1}{\sigma_i}\\
+   \end{aligned}
+\]
+
+
+
+## Question 3(c)
+We know that in a Risk-parity portfolio,
+
+$$RC_i(\mathbf{x})=\frac{x_i\mathbf{(Vx)}_i}{\sqrt{\mathbf{x^TVx}}} = \frac{\sigma_P(\boldsymbol{x})}{n}$$
+\[
+  \begin{aligned}
+   RC_i(\mathbf{x})=\frac{x_i\mathbf{(Vx)}_i}{\sqrt{\mathbf{x^TVx}}} = \frac{\sqrt{\mathbf{x^TVx}}}{n}\\
+   \frac{x_i\mathbf{(Vx)}_i}{\mathbf{x^TVx}} = \frac{1}{n}\\
+   \beta_ix_i = \frac{1}{n}\\
+   x_i = \frac{1}{n}\frac{1}{\beta_i}\\
+   Since,\ it\ is\ a\ fully\ invested\ portfolio \sum_{k=1}^{n} x_k=1\\
+   \sum_{k=1}^{n} \frac{1}{\beta_k}=n\\
+   x_i = \frac{1}{\sum_{k=1}^{n} \beta_k}\frac{1}{\beta_i}\\
+  \end{aligned}
+\]
